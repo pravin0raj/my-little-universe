@@ -1,0 +1,19 @@
+{
+  "name": "My Little Universe",
+  "short_name": "My Universe ♡",
+  "description": "An exclusive collection of our memories",
+  "start_url": "/my-little-universe/",
+  "scope": "/my-little-universe/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#190d17",
+  "theme_color": "#301322",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
