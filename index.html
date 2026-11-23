@@ -20,7 +20,7 @@
 #googleSignin{margin:16px auto 0;display:flex;justify-content:center;min-height:44px}#signinStatus{max-width:440px;margin:12px auto;color:#f4d4c5;font:12px/1.5 Arial,sans-serif}#accountInfo{font:12px Arial,sans-serif;color:#f1c9b4}#enter[disabled]{opacity:.55;cursor:not-allowed}
 .welcome-content h1,.welcome-content h1 em{font-family:Georgia,"Times New Roman",serif!important;font-weight:400!important}
 .welcome-content h1 em{font-style:italic!important}
-</style><script src="https://accounts.google.com/gsi/client" async defer></script></head><body><section id="welcome"><div class="sky" id="welcomeSky" aria-hidden="true"></div><div class="welcome-content"><div class="eyebrow">An exclusive collection of us</div><div class="orbit"><div class="heart">♡</div><span class="orbit-star" aria-hidden="true">✦</span></div><h1>My Little<br><em>Universe</em></h1><div class="ornament" aria-hidden="true">— ✦ —</div><p class="love-line">Among a billion stars,<br>you will always be my favourite.</p><button class="gold" id="enter" disabled>ENTER MY UNIVERSE ♡</button><div id="googleSignin"></div><p id="signinStatus" role="status">Sign in with your approved Google account to enter our universe.</p><p class="muted">♧ &nbsp; PRIVATE SIGN-IN · ENCRYPTED DRIVE STORAGE</p><div class="eyebrow welcome-end">Just you. Just me. Always.</div></div></section><main id="main" hidden><div class="sky" id="innerSky" aria-hidden="true"></div><header><span>✧ My Little Universe</span><span id="accountInfo"></span><button class="plain" id="exit">Sign out</button></header><p class="notice" id="storageNotice">🔒 PRIVATE GOOGLE DRIVE STORAGE: Checking storage connection…</p><section id="home"><div class="hero"><div class="eyebrow">Chapter one · Infinity</div><div class="orbit"><div class="heart">♡</div><span class="orbit-star" aria-hidden="true">✦</span></div><h1>Memories with <em>YOU</em> ♡</h1><p>Irulil iruntha en vaanathil, oliyaai vantha ore natchathiram nee.</p><div class="ornament" aria-hidden="true">— ♡ —</div><p style="font-size:13px">Every little memory is a star in our sky.</p></div><div class="toolbar"><h2>Our Treasures</h2><button class="gold" id="add">＋ Add a Memory</button><button class="plain" id="connectDrive" hidden>♡ Connect Google Drive</button><button class="plain" id="checkDrive" hidden>♡ Check Drive Status</button></div><div class="grid" id="tiles"></div></section><section id="album" hidden><div class="toolbar"><button class="plain" id="back">← Our Universe</button><button class="gold" id="addAlbum">＋ Add a Memory</button></div><h1 id="albumTitle"></h1><div id="collection" class="grid"></div></section><footer>“If memories were stars, ours would light up the entire universe.”</footer></main><dialog id="modal"><form id="form"><div class="toolbar"><h2>Add a memory</h2><button type="button" id="cancel" class="plain">Close</button></div><label>Collection<select id="category"></select></label><label>Memory title<input id="title" required maxlength="120"></label><label>Date<input id="date" type="date" required></label><label>Your message<textarea id="note" maxlength="4000"></textarea></label><label>Choose a file (max 95 MB)<input type="file" id="file"></label><p class="muted">Letters and special days can be saved without a file.</p><button class="gold" id="saveBtn" type="submit">Save to Google Drive</button></form></dialog><dialog id="lightbox"><div class="toolbar" style="margin-bottom:12px"><strong id="lbTitle"></strong><button type="button" id="lbClose" class="plain">Close ✕</button></div><div id="lbBody"></div></dialog><script>
+</style><script src="https://accounts.google.com/gsi/client" async defer></script></head><body><section id="welcome"><div class="sky" id="welcomeSky" aria-hidden="true"></div><div class="welcome-content"><div class="eyebrow">An exclusive collection of us</div><div class="orbit"><div class="heart">♡</div><span class="orbit-star" aria-hidden="true">✦</span></div><h1>My Little<br><em>Universe</em></h1><div class="ornament" aria-hidden="true">— ✦ —</div><p class="love-line">Among a billion stars,<br>you will always be my favourite.</p><button class="gold" id="enter" disabled>ENTER MY UNIVERSE ♡</button><div id="googleSignin"></div><p id="signinStatus" role="status">Sign in with your approved Google account to enter our universe.</p><p class="muted">♧ &nbsp; PRIVATE SIGN-IN · ENCRYPTED DRIVE STORAGE</p><div class="eyebrow welcome-end">Just you. Just me. Always.</div></div></section><main id="main" hidden><div class="sky" id="innerSky" aria-hidden="true"></div><header><span>✧ My Little Universe</span><span id="accountInfo"></span><button class="plain" id="exit">Sign out</button></header><p class="notice" id="storageNotice">🔒 PRIVATE GOOGLE DRIVE STORAGE: Checking storage connection…</p><section id="home"><div class="hero"><div class="eyebrow">Chapter one · Infinity</div><div class="orbit"><div class="heart">♡</div><span class="orbit-star" aria-hidden="true">✦</span></div><h1>Memories with <em>YOU</em> ♡</h1><p>Irulil iruntha en vaanathil, oliyaai vantha ore natchathiram nee.</p><div class="ornament" aria-hidden="true">— ♡ —</div><p style="font-size:13px">Every little memory is a star in our sky.</p></div><div class="toolbar"><h2>Our Treasures</h2><button class="gold" id="add">＋ Add a Memory</button><button class="plain" id="connectDrive" hidden>♡ Connect Google Drive</button><button class="plain" id="checkDrive" hidden>♡ Check Drive Status</button></div><div class="grid" id="tiles"></div></section><section id="album" hidden><div class="toolbar"><button class="plain" id="back">← Our Universe</button><button class="gold" id="addAlbum">＋ Add a Memory</button></div><h1 id="albumTitle"></h1><div id="collection" class="grid"></div></section><footer>“If memories were stars, ours would light up the entire universe.”</footer></main><dialog id="modal"><form id="form"><div class="toolbar"><h2 id="modalTitle">Add a memory</h2><button type="button" id="cancel" class="plain">Close</button></div><label id="catLabel">Collection<select id="category"></select></label><label>Memory title<input id="title" required maxlength="120"></label><label>Date<input id="date" type="date" required></label><label>Your message<textarea id="note" maxlength="4000"></textarea></label><label id="fileLabel">Choose a file (max 95 MB)<input type="file" id="file"></label><p class="muted" id="fileHint">Letters and special days can be saved without a file.</p><button class="gold" id="saveBtn" type="submit">Save to Google Drive</button></form></dialog><dialog id="lightbox"><div class="toolbar" style="margin-bottom:12px"><strong id="lbTitle"></strong><button type="button" id="lbClose" class="plain">Close ✕</button></div><div id="lbBody"></div></dialog><script>
 const sky=document.getElementById('welcomeSky');for(let i=0;i<65;i++){const e=document.createElement('span');e.className='sky-star';e.textContent=i%9===0?'✦':'·';e.style.cssText=`left:${(i*37+11)%99}%;top:${(i*19+7)%99}%;font-size:${i%9===0?14:9}px;animation-delay:${-i*.37}s`;sky.append(e)}for(let i=0;i<24;i++){const e=document.createElement('span');e.className='floating-love';e.textContent=i%3===0?'♥':'♡';e.style.cssText=`left:${(i*37+4)%98}%;font-size:${14+(i*7)%27}px;--duration:${12+i%9}s;--delay:${-i*1.37}s;--drift:${i%2?65:-65}px`;sky.append(e)}
 const innerSky=document.getElementById('innerSky');for(const node of sky.children){innerSky.append(node.cloneNode(true))}
 
@@ -41,6 +41,7 @@ const cats=[
 
 let memories=[];
 let current=null;
+let editingMemory=null;
 let signedInProfile=null;
 let googleIdToken=null;
 const blobCache=new Map();
@@ -190,9 +191,17 @@ function renderAlbum(){
 
     card.append(el('h3',m.title),el('small',m.date),el('p',m.note));
 
+    const isAdmin=signedInProfile&&signedInProfile.role==='admin';
+
+    const editBtn=el('button','Edit','plain');
+    editBtn.style.fontSize='12px';editBtn.style.padding='7px 12px';
+    editBtn.hidden=!isAdmin;
+    editBtn.onclick=()=>openEdit(m);
+    actions.append(editBtn);
+
     const del=el('button','Remove','plain');
     del.style.fontSize='12px';del.style.padding='7px 12px';
-    del.hidden=!(signedInProfile&&signedInProfile.role==='admin');
+    del.hidden=!isAdmin;
     del.onclick=async()=>{
       if(!confirm('Delete this memory permanently from Google Drive?'))return;
       del.disabled=true;del.textContent='Deleting…';
@@ -227,16 +236,38 @@ cats.filter(c=>c[0]!=='timeline').forEach(c=>{
 function updateFile(){
   const c=$('category').value;
   $('file').accept=({photos:'image/*',songs:'audio/*',voice:'audio/*',videos:'video/*'})[c]||'';
-  $('file').required=['photos','songs','voice','videos','files'].includes(c);
+  $('file').required=!editingMemory&&['photos','songs','voice','videos','files'].includes(c);
 }
 
 function add(){
   if(!signedInProfile||signedInProfile.role!=='admin'){alert('Only the admin can add memories.');return;}
+  editingMemory=null;
+  $('modalTitle').textContent='Add a memory';
+  $('saveBtn').textContent='Save to Google Drive';
+  $('catLabel').hidden=false;
+  $('fileLabel').hidden=false;
+  $('fileHint').hidden=false;
   $('form').reset();
   $('category').value=current&&current!=='timeline'?current:'photos';
   const d=new Date();
   $('date').value=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
   updateFile();
+  $('modal').showModal();
+}
+
+function openEdit(m){
+  if(!signedInProfile||signedInProfile.role!=='admin'){alert('Only the admin can edit memories.');return;}
+  editingMemory=m;
+  $('modalTitle').textContent='Edit memory';
+  $('saveBtn').textContent='Update Memory';
+  $('catLabel').hidden=true;
+  $('fileLabel').hidden=true;
+  $('fileHint').hidden=true;
+  $('file').required=false;
+  $('category').value=m.cat;
+  $('title').value=m.title;
+  $('date').value=m.date;
+  $('note').value=m.note||'';
   $('modal').showModal();
 }
 
@@ -286,17 +317,67 @@ $('exit').onclick=()=>{
 };
 $('back').onclick=home;
 $('add').onclick=$('addAlbum').onclick=add;
-$('cancel').onclick=()=>$('modal').close();
+$('cancel').onclick=()=>{editingMemory=null;$('modal').close();};
 
 $('form').onsubmit=async e=>{
   e.preventDefault();
   if(!signedInProfile||signedInProfile.role!=='admin'){alert('Admin access required.');return;}
+
+  const btn=$('saveBtn');
+
+  if(editingMemory){
+    btn.disabled=true;btn.textContent='Updating…';
+    try{
+      const payload={
+        title:$('title').value,
+        date:$('date').value,
+        note:$('note').value
+      };
+      let res=await fetch(`${WORKER_API}/api/memories/${encodeURIComponent(editingMemory.id)}`,{
+        method:'PATCH',
+        headers:{
+          'Content-Type':'application/json',
+          Authorization:'Bearer '+googleIdToken
+        },
+        body:JSON.stringify(payload)
+      });
+      if(res.status===404||res.status===405){
+        res=await fetch(`${WORKER_API}/api/memories/${encodeURIComponent(editingMemory.id)}`,{
+          method:'PUT',
+          headers:{
+            'Content-Type':'application/json',
+            Authorization:'Bearer '+googleIdToken
+          },
+          body:JSON.stringify(payload)
+        });
+      }
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){
+        if(res.status===404||res.status===405){
+          throw new Error('Backend Worker needs the PATCH /api/memories/:id route enabled to save edits to Google Drive.');
+        }
+        throw new Error(data.error||'Update failed');
+      }
+      const idx=memories.findIndex(x=>x.id===editingMemory.id);
+      if(idx!==-1){
+        memories[idx]={...memories[idx],...payload,...(data.memory||{})};
+      }
+      editingMemory=null;
+      $('modal').close();
+      renderAlbum();
+    }catch(err){
+      alert(err.message||'Failed to update memory.');
+    }finally{
+      btn.disabled=false;btn.textContent='Update Memory';
+    }
+    return;
+  }
+
   const f=$('file').files[0];
   const cat=$('category').value;
   const prefix=({photos:'image/',songs:'audio/',voice:'audio/',videos:'video/'})[cat];
   if(f&&prefix&&f.type&&!f.type.startsWith(prefix)){alert('Please select the correct media type.');return;}
 
-  const btn=$('saveBtn');
   btn.disabled=true;btn.textContent='Uploading to Google Drive…';
   try{
     const fd=new FormData();
