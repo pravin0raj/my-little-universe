@@ -45,6 +45,7 @@ let editingMemory=null;
 let signedInProfile=null;
 let googleIdToken=null;
 const blobCache=new Map();
+const inflightBlobs=new Map();
 
 function el(tag,txt,cls){
   const e=document.createElement(tag);
@@ -105,15 +106,33 @@ function detectPreviewKind(m,blobType){
 
 async function fetchPrivateBlob(fileId){
   if(blobCache.has(fileId))return blobCache.get(fileId);
-  const res=await fetch(`${WORKER_API}/api/file/${encodeURIComponent(fileId)}`,{
-    headers:{Authorization:'Bearer '+googleIdToken}
-  });
-  if(!res.ok)throw new Error('Could not load private file');
-  const blob=await res.blob();
-  const entry={url:URL.createObjectURL(blob),blob};
-  blobCache.set(fileId,entry);
-  return entry;
+  if(inflightBlobs.has(fileId))return inflightBlobs.get(fileId);
+  const p=(async()=>{
+    try{
+      const res=await fetch(`${WORKER_API}/api/file/${encodeURIComponent(fileId)}`,{
+        headers:{Authorization:'Bearer '+googleIdToken}
+      });
+      if(!res.ok)throw new Error('Could not load private file');
+      const blob=await res.blob();
+      const entry={url:URL.createObjectURL(blob),blob};
+      blobCache.set(fileId,entry);
+      return entry;
+    }finally{
+      inflightBlobs.delete(fileId);
+    }
+  })();
+  inflightBlobs.set(fileId,p);
+  return p;
 }
+
+const lazyObserver='IntersectionObserver' in window ? new IntersectionObserver((entries,obs)=>{
+  entries.forEach(ent=>{
+    if(ent.isIntersecting){
+      obs.unobserve(ent.target);
+      ent.target._loadMedia&&ent.target._loadMedia();
+    }
+  });
+},{rootMargin:'300px'}) : null;
 
 function renderAlbum(){
   const area=$('collection');
@@ -134,59 +153,78 @@ function renderAlbum(){
     if(m.fileId){
       const holder=el('div','Loading preview…','muted');
       card.append(holder);
-      fetchPrivateBlob(m.fileId).then(async({url,blob})=>{
+      const kindGuess=detectPreviewKind(m,m.mimeType);
+
+      const loadMedia=()=>{
+        fetchPrivateBlob(m.fileId).then(async({url,blob})=>{
+          holder.replaceChildren();
+          holder.className='';
+          const kind=detectPreviewKind(m,blob.type);
+
+          if(kind==='image'){
+            const img=el('img',null,'zoomable');
+            img.alt=m.title;img.src=url;img.title='Click to view full screen';
+            img.onclick=()=>{const big=el('img');big.src=url;big.alt=m.title;openLightbox(m.title,big);};
+            holder.append(img);
+          }else if(kind==='video'){
+            const vid=el('video');
+            vid.controls=true;vid.playsInline=true;vid.preload='metadata';vid.src=url;
+            holder.append(vid);
+          }else if(kind==='audio'){
+            const aud=el('audio');
+            aud.controls=true;aud.preload='metadata';aud.src=url;
+            holder.append(aud);
+          }else if(kind==='html'){
+            const htmlText=await blob.text();
+            const frame=el('iframe',null,'doc-preview');
+            frame.setAttribute('sandbox','allow-scripts allow-forms');
+            frame.srcdoc=htmlText;
+            frame.title=m.title;
+            holder.append(frame);
+            const fullBtn=el('button','Open Interactive Page','plain');
+            fullBtn.style.fontSize='12px';fullBtn.style.padding='7px 12px';
+            fullBtn.onclick=()=>{
+              const f=el('iframe');
+              f.setAttribute('sandbox','allow-scripts allow-forms');
+              f.srcdoc=htmlText;
+              openLightbox(m.title,f);
+            };
+            actions.prepend(fullBtn);
+          }else if(kind==='pdf'){
+            const frame=el('iframe',null,'doc-preview');
+            frame.src=url;frame.title=m.title;
+            holder.append(frame);
+            const fullBtn=el('button','Full Screen Preview','plain');
+            fullBtn.style.fontSize='12px';fullBtn.style.padding='7px 12px';
+            fullBtn.onclick=()=>{const f=el('iframe');f.src=url;openLightbox(m.title,f);};
+            actions.prepend(fullBtn);
+          }else if(kind==='text'){
+            const pre=el('pre',await blob.text(),'txt-preview');
+            holder.append(pre);
+          }else{
+            holder.append(el('p','📄 '+(m.filename||'Attached file'),'muted'));
+          }
+
+          const dl=el('a','Download','plain');
+          dl.href=url;dl.download=m.filename||'memory';
+          actions.prepend(dl);
+        }).catch(()=>{holder.textContent='Unable to load preview.';});
+      };
+
+      if(blobCache.has(m.fileId)){
+        loadMedia();
+      }else if(kindGuess==='video'){
         holder.replaceChildren();
-        holder.className='';
-        const kind=detectPreviewKind(m,blob.type);
-
-        if(kind==='image'){
-          const img=el('img',null,'zoomable');
-          img.alt=m.title;img.src=url;img.title='Click to view full screen';
-          img.onclick=()=>{const big=el('img');big.src=url;big.alt=m.title;openLightbox(m.title,big);};
-          holder.append(img);
-        }else if(kind==='video'){
-          const vid=el('video');
-          vid.controls=true;vid.playsInline=true;vid.preload='metadata';vid.src=url;
-          holder.append(vid);
-        }else if(kind==='audio'){
-          const aud=el('audio');
-          aud.controls=true;aud.preload='metadata';aud.src=url;
-          holder.append(aud);
-        }else if(kind==='html'){
-          const htmlText=await blob.text();
-          const frame=el('iframe',null,'doc-preview');
-          frame.setAttribute('sandbox','allow-scripts allow-forms');
-          frame.srcdoc=htmlText;
-          frame.title=m.title;
-          holder.append(frame);
-          const fullBtn=el('button','Open Interactive Page','plain');
-          fullBtn.style.fontSize='12px';fullBtn.style.padding='7px 12px';
-          fullBtn.onclick=()=>{
-            const f=el('iframe');
-            f.setAttribute('sandbox','allow-scripts allow-forms');
-            f.srcdoc=htmlText;
-            openLightbox(m.title,f);
-          };
-          actions.prepend(fullBtn);
-        }else if(kind==='pdf'){
-          const frame=el('iframe',null,'doc-preview');
-          frame.src=url;frame.title=m.title;
-          holder.append(frame);
-          const fullBtn=el('button','Full Screen Preview','plain');
-          fullBtn.style.fontSize='12px';fullBtn.style.padding='7px 12px';
-          fullBtn.onclick=()=>{const f=el('iframe');f.src=url;openLightbox(m.title,f);};
-          actions.prepend(fullBtn);
-        }else if(kind==='text'){
-          const pre=el('pre',await blob.text(),'txt-preview');
-          holder.append(pre);
-        }else{
-          holder.append(el('p','📄 '+(m.filename||'Attached file'),'muted'));
-        }
-
-        const dl=el('a','Download','plain');
-        dl.href=url;dl.download=m.filename||'memory';
-        actions.prepend(dl);
-      }).catch(()=>{holder.textContent='Unable to load preview.';});
+        const playBtn=el('button','▶ Load Video'+(m.filename?` (${m.filename})`:''),'plain');
+        playBtn.style.width='100%';playBtn.style.padding='24px 12px';
+        playBtn.onclick=()=>{holder.textContent='Loading video…';loadMedia();};
+        holder.append(playBtn);
+      }else if(lazyObserver){
+        card._loadMedia=loadMedia;
+        lazyObserver.observe(card);
+      }else{
+        loadMedia();
+      }
     }
 
     card.append(el('h3',m.title),el('small',m.date),el('p',m.note));
@@ -328,40 +366,48 @@ $('form').onsubmit=async e=>{
   if(editingMemory){
     btn.disabled=true;btn.textContent='Updating…';
     try{
-      const payload={
-        title:$('title').value,
-        date:$('date').value,
-        note:$('note').value
-      };
-      let res=await fetch(`${WORKER_API}/api/memories/${encodeURIComponent(editingMemory.id)}`,{
-        method:'PATCH',
-        headers:{
-          'Content-Type':'application/json',
-          Authorization:'Bearer '+googleIdToken
-        },
-        body:JSON.stringify(payload)
+      const newTitle=$('title').value;
+      const newDate=$('date').value;
+      const newNote=$('note').value;
+
+      // Fallback using existing POST + DELETE routes supported by the Worker (avoids CORS preflight failure on PATCH/PUT)
+      const fd=new FormData();
+      fd.append('cat',editingMemory.cat);
+      fd.append('title',newTitle);
+      fd.append('date',newDate);
+      fd.append('note',newNote);
+      if(editingMemory.fileId)fd.append('fileId',editingMemory.fileId);
+      if(editingMemory.filename)fd.append('filename',editingMemory.filename);
+      if(editingMemory.mimeType)fd.append('mimeType',editingMemory.mimeType);
+
+      const postRes=await fetch(`${WORKER_API}/api/memories`,{
+        method:'POST',
+        headers:{Authorization:'Bearer '+googleIdToken},
+        body:fd
       });
-      if(res.status===404||res.status===405){
-        res=await fetch(`${WORKER_API}/api/memories/${encodeURIComponent(editingMemory.id)}`,{
-          method:'PUT',
-          headers:{
-            'Content-Type':'application/json',
-            Authorization:'Bearer '+googleIdToken
-          },
-          body:JSON.stringify(payload)
-        });
+      const postData=await postRes.json().catch(()=>({}));
+      if(!postRes.ok)throw new Error(postData.error||'Could not save updated memory.');
+
+      // Remove old metadata entry if Worker assigned a new ID
+      if(postData.memory&&postData.memory.id&&postData.memory.id!==editingMemory.id){
+        await fetch(`${WORKER_API}/api/memories/${encodeURIComponent(editingMemory.id)}`,{
+          method:'DELETE',
+          headers:{Authorization:'Bearer '+googleIdToken}
+        }).catch(()=>{});
       }
-      const data=await res.json().catch(()=>({}));
-      if(!res.ok){
-        if(res.status===404||res.status===405){
-          throw new Error('Backend Worker needs the PATCH /api/memories/:id route enabled to save edits to Google Drive.');
-        }
-        throw new Error(data.error||'Update failed');
-      }
+
       const idx=memories.findIndex(x=>x.id===editingMemory.id);
-      if(idx!==-1){
-        memories[idx]={...memories[idx],...payload,...(data.memory||{})};
-      }
+      const updatedMem={
+        ...editingMemory,
+        ...(postData.memory||{}),
+        title:newTitle,
+        date:newDate,
+        note:newNote,
+        fileId:editingMemory.fileId,
+        filename:editingMemory.filename,
+        mimeType:editingMemory.mimeType
+      };
+      if(idx!==-1)memories[idx]=updatedMem;
       editingMemory=null;
       $('modal').close();
       renderAlbum();
