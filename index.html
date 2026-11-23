@@ -59,8 +59,19 @@ function openLightbox(title,node){
   $('lbBody').replaceChildren(node);
   $('lightbox').showModal();
 }
-$('lbClose').onclick=()=>$('lightbox').close();
-$('lightbox').onclick=e=>{if(e.target===$('lightbox'))$('lightbox').close();};
+function closeLightbox(){
+  $('lbBody').querySelectorAll('video,audio').forEach(m=>m.pause());
+  $('lbBody').replaceChildren();
+  $('lightbox').close();
+}
+$('lbClose').onclick=closeLightbox;
+$('lightbox').onclick=e=>{if(e.target===$('lightbox'))closeLightbox();};
+
+function requestNativeFullscreen(el){
+  if(el.requestFullscreen)el.requestFullscreen();
+  else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
+  else if(el.webkitEnterFullscreen)el.webkitEnterFullscreen();
+}
 
 function renderTiles(){
   $('tiles').replaceChildren();
@@ -169,7 +180,18 @@ function renderAlbum(){
           }else if(kind==='video'){
             const vid=el('video');
             vid.controls=true;vid.playsInline=true;vid.preload='metadata';vid.src=url;
+            vid.setAttribute('controlsList','');
             holder.append(vid);
+            const fullBtn=el('button','Full Screen','plain');
+            fullBtn.style.fontSize='12px';fullBtn.style.padding='7px 12px';
+            fullBtn.onclick=()=>{
+              vid.pause();
+              const bigVid=el('video');
+              bigVid.controls=true;bigVid.playsInline=true;bigVid.autoplay=true;bigVid.src=url;
+              openLightbox(m.title,bigVid);
+              requestNativeFullscreen(bigVid);
+            };
+            actions.prepend(fullBtn);
           }else if(kind==='audio'){
             const aud=el('audio');
             aud.controls=true;aud.preload='metadata';aud.src=url;
@@ -370,7 +392,6 @@ $('form').onsubmit=async e=>{
       const newDate=$('date').value;
       const newNote=$('note').value;
 
-      // Fallback using existing POST + DELETE routes supported by the Worker (avoids CORS preflight failure on PATCH/PUT)
       const fd=new FormData();
       fd.append('cat',editingMemory.cat);
       fd.append('title',newTitle);
@@ -388,7 +409,6 @@ $('form').onsubmit=async e=>{
       const postData=await postRes.json().catch(()=>({}));
       if(!postRes.ok)throw new Error(postData.error||'Could not save updated memory.');
 
-      // Remove old metadata entry if Worker assigned a new ID
       if(postData.memory&&postData.memory.id&&postData.memory.id!==editingMemory.id){
         await fetch(`${WORKER_API}/api/memories/${encodeURIComponent(editingMemory.id)}`,{
           method:'DELETE',
